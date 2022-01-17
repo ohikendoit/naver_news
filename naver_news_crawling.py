@@ -14,7 +14,7 @@ contents_text = []
 result = {}
 
 #결과 엑셀 저장하기 위한 변수
-RESULT_PATH = '/Users/ohikendoit/Downloads'
+RESULT_PATH = '/Users/ohikendoit/Downloads/'
 now = datetime.now()
 
 #날짜 정제화 함수
@@ -50,7 +50,9 @@ def crawler(maxpage, query, sort, s_date, e_date):
     maxpage_t = (int(maxpage)-1)*10+1
 
     while page <= maxpage_t:
-        url = "https://search.naver.com/search.naver?where=news&query=" + query + "&sort="+sort+"&ds=" + s_date + "&de=" + e_date + "&nso=so%3Ar%2Cp%3Afrom" + s_from + "to" + e_to + "%2Ca%3A&start=" + str(page)
+        #연합뉴스 매체만 선택함: mynews, office_type, office_section_code, news_office_checked 변수값 지정됨
+        #기간설정 디폴트값음 전체
+        url = "https://search.naver.com/search.naver?where=news&query=" + query + "&sort="+sort+"&ds=" + s_date + "&de=" + e_date + "&docid=&related=0&mynews=1&office_type=1&office_section_code=2&news_office_checked=1001" + "&nso=so%3Ar%2Cp%3Afrom" + s_from + "to" + e_to + "%2Ca%3A&start=" + str(page) #+ "mynews=1&office_type=1&office_section_code=2&news_office_checked=1001"
 
         response = requests.get(url)
         html = response.text
@@ -81,7 +83,7 @@ def crawler(maxpage, query, sort, s_date, e_date):
             contents_cleaning(contents_list)
 
         #모든 리스트 요소를 딕셔너리형태로 저장
-        result = {"date": date_text, "title":title_text, "source":source_text, "contents":contents_text, "link":link_text}
+        result = {"date": date_text, "company":query, "title":title_text, "source":source_text, "contents":contents_text, "link":link_text}
         print(page)
 
         df = pd.DataFrame(result)
@@ -97,8 +99,8 @@ def main():
     maxpage = input("최대 크롤링할 페이지 수를 입력하세요: ")
     query = input("검색어 입력: ")
     sort = input("뉴스 검색 방식 입력(관련도순=0, 최신순=1, 오래된순=2): ")
-    s_date = input("시작 날짜 입력(2021.01.17): ")
-    e_date = input("끝 날짜 입력(2021.01.17): ")
+    s_date = '2000.01.01' #input("시작 날짜 입력(2021.01.17): ")
+    e_date = '2022.01.16' #input("끝 날짜 입력(2021.01.17): ")
 
     crawler(maxpage, query, sort, s_date, e_date)
 
