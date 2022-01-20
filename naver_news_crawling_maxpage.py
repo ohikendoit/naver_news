@@ -47,20 +47,31 @@ def contents_cleaning(contents):
     contents_text.append(third_cleaning_contents)
 
 #크롤링 함수
-def crawler(maxpage, query, sort):
+def crawler(query):
+    maximum = 0
     page = 1
-    maxpage_t = (int(maxpage)-1)*10+1
 
-    while page <= maxpage_t:
-        #연합뉴스 매체만 선택함: mynews, office_type, office_section_code, news_office_checked 변수값 지정됨
-        #기간설정 디폴트값음 전체
-        url = "https://search.naver.com/search.naver?where=news&query=" + query + "&sort=" + sort + "&pd=0&ds=&de=&mynews=1&office_type=1&office_section_code=2&news_office_checked=1001&nso=so:dd,p:all,a:all&start=" + str(page)
+    #연합뉴스 매체만 선택함: mynews, office_type, office_section_code, news_office_checked 변수값 지정됨
+    #기간설정 디폴트값음 전체
+    url = "https://search.naver.com/search.naver?where=news&query=" + query + "&sort=1&pd=0&ds=&de=&mynews=1&office_type=1&office_section_code=2&news_office_checked=1001&nso=so:dd,p:all,a:all&start=1"
+    response = requests.get(url, headers=headers)
+    html = response.text
 
-        response = requests.get(url, headers=headers)
-        html = response.text
+    #뷰티풀수프의 인자값 지정
+    soup = BeautifulSoup(html, 'html.parser')
 
-        #뷰티풀수프의 인자값 지정
-        soup = BeautifulSoup(html, 'html.parser')
+    #페이지네이션 최대값 도출
+    while 1:
+        page_list = soup.findAll("a", {"class": "NP=r:" + str(page)})
+        if not page_list:
+            maximum = page - 1
+            break
+        page = page + 1
+
+    print("총"+str(maximum)+" 개의 페이지가 확인 됬습니다.")
+
+    whole_source = ""
+    for page_number in range(1, maximum+1):
 
         #<a>태그에서 제목과 링크주소 추출
         atags = soup.select('.news_tit')

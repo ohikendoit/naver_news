@@ -11,7 +11,6 @@ link_text = []
 source_text = []
 date_text = []
 contents_text = []
-article_text = []
 result = {}
 
 #결과 엑셀 저장하기 위한 변수
@@ -44,14 +43,16 @@ def contents_cleaning(contents):
     contents_text.append(third_cleaning_contents)
 
 #크롤링 함수
-def crawler(maxpage, query, sort):
+def crawler(maxpage, query, sort, s_date, e_date):
+    s_from = s_date.replace(".", "")
+    e_to = e_date.replace(".", "")
     page = 1
     maxpage_t = (int(maxpage)-1)*10+1
 
     while page <= maxpage_t:
         #연합뉴스 매체만 선택함: mynews, office_type, office_section_code, news_office_checked 변수값 지정됨
         #기간설정 디폴트값음 전체
-        url = "https://search.naver.com/search.naver?where=news&query=" + query + "&sort=" + sort + "&pd=0&ds=&de=&mynews=1&office_type=1&office_section_code=2&news_office_checked=1001&nso=so:dd,p:all,a:all&start=" + str(page)
+        url = "https://search.naver.com/search.naver?where=news&query=" + query + "&sort="+sort+"&ds=" + s_date + "&de=" + e_date + "&docid=&related=0&mynews=1&office_type=1&office_section_code=2&news_office_checked=1001" + "&nso=so%3Ar%2Cp%3Afrom" + s_from + "to" + e_to + "%2Ca%3A&start=" + str(page) #+ "mynews=1&office_type=1&office_section_code=2&news_office_checked=1001"
 
         response = requests.get(url)
         html = response.text
@@ -64,28 +65,6 @@ def crawler(maxpage, query, sort):
         for atag in atags:
             title_text.append(atag.text)
             link_text.append(atag['href'])
-
-        #찾은 링크를 기반으로 본문 내용을 가져오기
-        atags = soup.select('.news_tit')
-        for atag in atags:
-            article_content = ''
-            main_url = atag['href']
-
-            req = requests.get(main_url)
-            req.encoding = None
-            soup_article = BeautifulSoup(req.text, 'html.parser')
-
-            if ('://yna' in main_url) | ('app.yonhapnews' in main_url):
-                main_article = soup_article.find('article', {'class': 'story-news article'})
-                for line in main_article.select('p'):
-                    article_content += line.get_text()
-                if main_article == None:
-                    main_article = soup.find('div', {'class': 'article-txt'})
-            else:
-                text == None
-
-            article_content_clean = article_content.replace('\n', '').replace('\r', '').replace('<br>', '').replace('\t', '')
-            article_text.append(article_content_clean)
 
         #신문사 추출
         source_lists = soup.select('.info_group > .press')
@@ -104,11 +83,11 @@ def crawler(maxpage, query, sort):
             contents_cleaning(contents_list)
 
         #모든 리스트 요소를 딕셔너리형태로 저장
-        result = {"date_published": date_text, "company": query, "news_title": title_text, "source_media": source_text, "contents_summary": contents_text, "article": article_text, "url_link": link_text}
+        result = {"date": date_text, "company":query, "title":title_text, "source":source_text, "contents":contents_text, "link":link_text}
         print(page)
-        print(result)
+
         df = pd.DataFrame(result)
-        page += 1
+        page += 10
 
     #새로 만들 파일이름 지정
     outputFileName = '%s-%s-%s %s시 %s분 %s초 merging.xlsx' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
@@ -117,10 +96,12 @@ def crawler(maxpage, query, sort):
 def main():
     info_main = input("="*50 + "\n" + "입력 형식에 맞게 입력해주세요." + "\n" + "시작하시려면 Enter를 눌러주세요." + "\n" + "="*50)
 
-    maxpage = input("최대 크롤링할 페이지 수 입력하시오: ")
+    maxpage = input("최대 크롤링할 페이지 수를 입력하세요: ")
     query = input("검색어 입력: ")
     sort = input("뉴스 검색 방식 입력(관련도순=0, 최신순=1, 오래된순=2): ")
+    s_date = input("시작 날짜 입력(2021.01.17): ")
+    e_date = input("끝 날짜 입력(2021.01.17): ")
 
-    crawler(maxpage, query, sort)
+    crawler(maxpage, query, sort, s_date, e_date)
 
 main()
