@@ -4,7 +4,7 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
 #open database connection
-db = pymysql.connect(host='192.168.1.134', port=3306, user='***', passwd='***', db='hscode', autocommit=True)
+db = pymysql.connect(host='192.168.1.134', port=3306, user='ohikendoit', passwd='Wjddbstjd!3', db='hscode', autocommit=True)
 
 #prepare a cursor object using cursor(method)
 cursor = db.cursor()
