@@ -21,6 +21,12 @@ result = {}
 RESULT_PATH = '/Users/ohikendoit/Downloads/'
 now = datetime.now()
 
+#엑셀파일 로드를 통한 상장사 목록 생성
+companies = []
+df_companies = pd.read_csv('/Users/ohikendoit/Downloads/korean_companies.csv')
+companies = df_companies['회사명'].tolist()
+companies = companies[:20]
+
 #날짜 정제화 함수
 def date_cleaning(test):
     try:
@@ -121,9 +127,18 @@ def crawler(maxpage, query):
 def main():
     info_main = input("="*50 + "\n" + "입력 형식에 맞게 입력해주세요." + "\n" + "시작하시려면 Enter를 눌러주세요." + "\n" + "="*50)
 
-    maxpage = input("최대 크롤링할 페이지 수 입력하시오: ")
+    maxpage = input("최대 크롤링할 페이지 수를 입력하시오: ")
     query = input("검색어 입력: ")
 
     crawler(maxpage, query)
 
-main()
+def download_all():
+    info_main = input("="*50 + "\n" + "입력 형식에 맞게 입력해주세요." + "\n" + "시작하시려면 Enter를 눌러주세요." + "\n" + "="*50)
+
+#    maxpage = input("최대 크롤링할 페이지 수를 입력하시오: ")
+
+    for i in companies:
+        crawler(10, i)
+
+
+download_all()
