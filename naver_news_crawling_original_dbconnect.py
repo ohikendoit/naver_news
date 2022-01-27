@@ -185,7 +185,7 @@ def crawler(maxpage, query):
         #INSERT 쿼리문
         for i in range(len(result)):
             query = "INSERT IGNORE INTO news(date_published, company, news_title, source_media, contents_summary, article, url_link) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-            arguments = (result["date_published"][i], result["company"][i], result["new_title"][i], result["source_media"][i], result["contents_summary"][i]contents_text, article_text, link_text)
+            arguments = (result["date_published"][i], result["company"][i], result["news_title"][i], result["source_media"][i], result["contents_summary"][i], result["article"][i], result["url_link"][i])
         cursor.execute(query, arguments)
         db.commit()
 
