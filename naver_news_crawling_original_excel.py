@@ -11,12 +11,24 @@ import mysql.connector
 #요청 해더 추가 - Get요청 차단시 변경 필요
 headers = {"user-agent": "Mozilla/6.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36"}
 
+title_text = []
+company_name = []
+link_text = []
+source_text = []
+date_text = []
+contents_text = []
+article_text = []
+result = {}
+
+#액셀로 저장하기위한 변수
+RESULT_PATH = '/Users/ohikendoit/Desktop/CBCM/'
+now = datetime.now()
 
 #데이터베이스 연동정보 저장
 db = mysql.connector.connect(
-                 host = "localhost",
+                 host = "192.168.1.134",
                  port = 3306,
-                 user = "root",
+                 user = "ohikendoit",
                  passwd = "Wjddbstjd!3",
                  database = "news_db",
                  auth_plugin = "mysql_native_password"
@@ -64,18 +76,6 @@ cursor = db.cursor()
 
 #engine = db.create_engine('mysql+pymysql://ohikendoit:*****!3@192.168.1.134/news_db')
 
-title_text = []
-company_name = []
-link_text = []
-source_text = []
-date_text = []
-contents_text = []
-article_text = []
-result = {}
-
-#결과 엑셀 저장하기 위한 변수
-RESULT_PATH = '/Users/ohikendoit/Downloads/'
-now = datetime.now()
 
 #엑셀파일 로드를 통한 코스피 상장사 목록 생성 (n=800+)
 companies = []
@@ -181,27 +181,16 @@ def crawler(maxpage, query):
         result = {"date_published": date_text, "company": company_name, "news_title": title_text, "source_media": source_text, "contents_summary": contents_text, "article": article_text, "url_link": link_text}
         print(result)
 
-        #INSERT 쿼리문
-        for i in range(len(date_text)):
-            query = "INSERT IGNORE INTO news(date_published, company, news_title, source_media, contents_summary, article, url_link) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-            arguments = (result["date_published"][i], result["company"][i], result["news_title"][i], result["source_media"][i], result["contents_summary"][i], result["article"][i], result["url_link"][i])
-            cursor.execute(query, arguments)
-            db.commit()
-
-
-        #pandas.DataFrame.to_sql
-        result.clear()
         print(page)
         #df = pd.DataFrame(result)
         #df.to_sql('news', con=engine, if_exists='replace', index_label='id')
         #engine.execute("SELECT * FROM news").fetchall()
-
+        df = pd.DataFrame(result)
         page += 10
-        print(page)
 
     #새로 만들 파일이름 지정
     outputFileName = '%s-%s-%s %s시 %s분 %s초 merging.xlsx' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
-    #df.to_excel(RESULT_PATH+outputFileName,sheet_name='sheet1')
+    df.to_excel(RESULT_PATH+outputFileName,sheet_name='sheet1')
 
 
 def main():
